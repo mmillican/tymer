@@ -7,8 +7,10 @@ Tymer is a CLI-based time logger to track time entries for your work.
 Tymer is built as a .NET Core Global Tool. You can install with the following
 command:
 
+**Note:** this has not yet been published as a Nuget package. Build and install from source.
+
 ```bash
-> dotnet tool install -g dotnetsay
+> dotnet tool install -g tymer
 ```
 
 Or temporarily from source by:
@@ -19,10 +21,16 @@ Or temporarily from source by:
 
 ## Guide
 
-**Log time enry**
+**Log time entry**
 
 ```bash
 > tymer log <start_time> <end_time> -C "<your_comments>"
+```
+
+**List time entries**
+
+```bash
+> tymer list [--help]
 ```
 
 **Help**
