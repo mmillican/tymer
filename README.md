@@ -11,7 +11,7 @@ command:
 > dotnet tool install -g dotnetsay
 ```
 
-Or temporarily from source by: 
+Or temporarily from source by:
 
 ```bash
 > dotnet tool install --global --add-source ./nupkg tymer
@@ -36,3 +36,4 @@ Or temporarily from source by:
 - Support for "projects" / groups
 - Ability to edit/remove entries
 - `appsettings.json` support for settings
+- Split log files between periods (day, week, month, etc)
