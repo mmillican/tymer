@@ -26,10 +26,15 @@ namespace tymer.Commands
                 .OrderByDescending(x => x.StartTime)
                 .ThenByDescending(x => x.EndTime);
 
+            var hoursSum = entries.Sum(x => x.Duration);
+
             foreach(var entry in entries)
             {
                 Console.WriteLine($"{entry.StartTime:yyyy-MM-dd} \t {entry.StartTime:hh:mm tt} \t {entry.EndTime:hh:mm tt} \t {entry.Duration:n2} \t {entry.Comments}");
             }
+
+            Console.WriteLine("----------");
+            Console.WriteLine($"Total: {hoursSum:n2}");
 
             return base.OnExecute(app);
         }
