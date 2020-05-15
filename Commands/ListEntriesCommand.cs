@@ -15,8 +15,11 @@ namespace tymer.Commands
         [Option("-e|--End", "End date to view logs for (inclusive of date)", CommandOptionType.SingleOrNoValue)]
         public DateTime? EndDate { get; set; }
 
-        [Option("-p|--Period", Description = "Time period to view logs for. Exclusive of Start/End dates")]
+        [Option("-p|--Period", Description = "Time period to view logs for. Does not work with Start/End dates")]
         public string Period { get; set; }
+
+        [Option("-sb|--SortBy", Description = "What property to sort time entries by in each grouping. Options: start [time, desc], end [time, desc], comments. Default is start time.")]
+        public string SortBy { get; set; }
 
         protected override int OnExecute(CommandLineApplication app)
         {
@@ -26,11 +29,36 @@ namespace tymer.Commands
                 .OrderByDescending(x => x.StartTime)
                 .ThenByDescending(x => x.EndTime);
 
+            if (!entries.Any())
+            {
+                Console.WriteLine("No time entries recorded for given period.");
+                return base.OnExecute(app);
+            }
+
             var hoursSum = entries.Sum(x => x.Duration);
 
-            foreach(var entry in entries)
+            if (Period.ToLower() == "week" || Period.ToLower() == "month")
             {
-                Console.WriteLine($"{entry.StartTime:yyyy-MM-dd} \t {entry.StartTime:hh:mm tt} \t {entry.EndTime:hh:mm tt} \t {entry.Duration:n2} \t {entry.Comments}");
+                var entriesByDate = entries.GroupBy(x => x.StartTime.Date);
+
+                foreach(var dateGrp in entriesByDate)
+                {
+                    Console.WriteLine($"Date: {dateGrp.Key:dddd MMM dd} ({dateGrp.Sum(x => x.Duration):n2})");
+
+                    foreach(var entry in dateGrp)
+                    {
+                        WriteEntryLine(entry);
+                    }
+
+                    Console.WriteLine("");
+                }
+            }
+            else
+            {
+                foreach (var entry in entries)
+                {
+                    WriteEntryLine(entry);
+                }
             }
 
             Console.WriteLine("----------");
@@ -39,10 +67,16 @@ namespace tymer.Commands
             return base.OnExecute(app);
         }
 
+        private void WriteEntryLine(TimeEntry entry) =>
+            Console.WriteLine($"{entry.StartTime:yyyy-MM-dd} \t {entry.StartTime:hh:mm tt} \t {entry.EndTime:hh:mm tt} \t {entry.Duration:n2} \t {entry.Comments}");
+
         private IEnumerable<TimeEntry> FilterEntries(List<TimeEntry> entries)
         {
-            // TODO: Date filtering
-
+            entries = entries
+                .Where(x => (!StartDate.HasValue || x.StartTime.Date == StartDate.Value.Date)
+                    && (!EndDate.HasValue || x.StartTime.Date == EndDate.Value))
+                .ToList();
+            
             if (!string.IsNullOrEmpty(Period))
             {
                 switch(Period.ToLower())
@@ -57,6 +91,16 @@ namespace tymer.Commands
             }
 
             return entries;
+        }
+
+        private IEnumerable<TimeEntry> SortEntries(List<TimeEntry> entries)
+        {
+            return (Period.ToLower()) switch
+            {
+                "end" => entries.OrderBy(x => x.EndTime),
+                "comments" => entries.OrderBy(x => x.Comments),
+                _ => entries.OrderBy(x => x.StartTime),
+            };
         }
 
         private static int GetWeekForDate(DateTime date) =>
