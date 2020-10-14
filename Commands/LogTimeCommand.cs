@@ -21,6 +21,7 @@ namespace tymer.Commands
         {
             var entry = new TimeEntry
             {
+                Id = Guid.NewGuid(),
                 StartTime = StartTime,
                 EndTime = EndTime,
                 Comments = Comments
@@ -33,7 +34,6 @@ namespace tymer.Commands
             context.SaveEntries();
 
             Console.WriteLine($"Time entry for {entry.Duration} hrs saved.");
-            // Console.WriteLine($"Time entry: Start: {entry.StartTime} End: {entry.EndTime} Duration: {entry.Duration} hrs Comments: {entry.Comments ?? "na"}");
             return base.OnExecute(app);
         }        
 
