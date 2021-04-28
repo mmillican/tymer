@@ -84,7 +84,8 @@ namespace tymer.Commands
                     case "day":
                         return entries.Where(x => x.StartTime.Date == DateTime.Now.Date);
                     case "week":
-                        return entries.Where(x => GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now));
+                        return entries.Where(x => x.StartTime.Year == DateTime.Now.Year
+                            && GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now));
                     case "month":
                         return entries.Where(x => x.StartTime.Month == DateTime.Now.Month);
                 }
