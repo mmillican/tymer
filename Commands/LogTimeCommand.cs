@@ -14,16 +14,24 @@ namespace tymer.Commands
         [Argument(1, "end", "End time")]
         public DateTime EndTime { get; set; }
 
-        [Option("-c|--Comment", Description = "Time entry comment")]
+        [Option("-d <DATE>", Description = "The date for the time entry. Defaults to today.")]
+        public DateTime? Date { get; set; }
+
+        [Option("-c|--Comment <COMMENTS>", Description = "Time entry comment")]
         public string Comments { get; set; }
 
         protected override int OnExecute(CommandLineApplication app)
         {
+            if (Date == null)
+            {
+                Date = DateTime.Now;
+            }
+
             var entry = new TimeEntry
             {
                 Id = Guid.NewGuid(),
-                StartTime = StartTime,
-                EndTime = EndTime,
+                StartTime = new DateTime(Date.Value.Year, Date.Value.Month, Date.Value.Day, StartTime.Hour, StartTime.Minute, 0),
+                EndTime = new DateTime(Date.Value.Year, Date.Value.Month, Date.Value.Day, EndTime.Hour, EndTime.Minute, 0),
                 Comments = Comments
             };
 
