@@ -5,6 +5,7 @@ using System.Text.Json;
 
 namespace tymer.Core
 {
+    [Obsolete("Should not save to JSON anymore. Use TymerDbContext")]
     public class TymerContext
     {
         public List<TimeEntry> TimeEntries { get; set; } = new List<TimeEntry>();

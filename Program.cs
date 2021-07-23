@@ -7,7 +7,8 @@ namespace tymer
     [Command("tymer")]
     [Subcommand(
         typeof(LogTimeCommand),
-        typeof(ListEntriesCommand)
+        typeof(ListEntriesCommand),
+        typeof(MigrateToDbCommand)
     )]
     class Tyme : TymeCommandBase
     {
@@ -19,7 +20,7 @@ namespace tymer
             return 1;
         }
 
-        public override List<string> CreateArgs() 
+        public override List<string> CreateArgs()
         {
             var args = new List<string>();
             return args;
