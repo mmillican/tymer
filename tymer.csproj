@@ -7,6 +7,15 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>tymer</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
+
+    <Authors>Matt Millican</Authors>
+    <PackageId>m2dev.tymer</PackageId>
+    <Copyright>InternetMill LLC. 2021</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/mmillican/Tymer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mmillican/Tymer</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

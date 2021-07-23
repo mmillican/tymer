@@ -1,5 +1,7 @@
 # Tymer
 
+[![NuGet](https://img.shields.io/nuget/v/m2dev.Tymer.svg?label=NuGet)](https://www.nuget.org/packages/m2dev.Tymer/)
+
 Tymer is a CLI-based time logger to track time entries for your work.
 
 ## Installation
@@ -7,10 +9,8 @@ Tymer is a CLI-based time logger to track time entries for your work.
 Tymer is built as a .NET Core Global Tool. You can install with the following
 command:
 
-**Note:** this has not yet been published as a Nuget package. Build and install from source.
-
 ```bash
-> dotnet tool install -g tymer
+> dotnet tool install -g m2dev.tymer
 ```
 
 Or temporarily from source by:
@@ -33,10 +33,15 @@ Or temporarily from source by:
 > tymer list [--help]
 ```
 
+**Migrate data from JSON file to SQLite DB**
+
+```bash
+> tymer migrate-to-db
+```
+
 **Help**
 
 `> tymer --help` will show a list of available commands.
-
 
 ## TODO
 - List entries per day (given date/range or week)
@@ -44,4 +49,3 @@ Or temporarily from source by:
 - Support for "projects" / groups
 - Ability to edit/remove entries
 - `appsettings.json` support for settings
-- Split log files between periods (day, week, month, etc)
