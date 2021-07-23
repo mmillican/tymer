@@ -16,10 +16,13 @@ namespace tymer.Commands
         public DateTime? EndDate { get; set; }
 
         [Option("-p|--Period", Description = "Time period to view logs for. Does not work with Start/End dates")]
-        public string Period { get; set; }
+        public string Period { get; set; } = "day";
 
         [Option("-sb|--SortBy", Description = "What property to sort time entries by in each grouping. Options: start [time, desc], end [time, desc], comments. Default is start time.")]
         public string SortBy { get; set; }
+
+        [Option("-id|--include-id", Description = "Include the entry ID")]
+        public bool IncludeEntryId { get; set; }
 
         protected override int OnExecute(CommandLineApplication app)
         {
@@ -67,8 +70,25 @@ namespace tymer.Commands
             return base.OnExecute(app);
         }
 
-        private void WriteEntryLine(TimeEntry entry) =>
-            Console.WriteLine($"{entry.StartTime:yyyy-MM-dd} \t {entry.StartTime:hh:mm tt} \t {entry.EndTime:hh:mm tt} \t {entry.Duration:n2} \t {entry.Comments}");
+        private void WriteEntryLine(TimeEntry entry)
+        {
+            var parts = new List<string>();
+
+            if (IncludeEntryId)
+            {
+                parts.Add(entry.Id.ToString());
+            }
+
+            parts.Add(entry.StartTime.ToString("hh:mm tt"));
+            parts.Add(entry.EndTime.ToString("hh:mm tt"));
+
+            parts.Add(entry.Duration.ToString("n2"));
+
+            parts.Add(entry.Comments);
+
+            var line = string.Join("\t", parts);
+            Console.WriteLine(line);            
+        }
 
         private IEnumerable<TimeEntry> FilterEntries(List<TimeEntry> entries)
         {
