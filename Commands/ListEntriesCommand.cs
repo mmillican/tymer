@@ -41,6 +41,7 @@ namespace tymer.Commands
                     "week" => entries.Where(x => x.StartTime.Year == DateTime.Now.Year
                             && GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now)),
                     "month" => entries.Where(x => x.StartTime.Month == DateTime.Now.Month),
+                    "all" => entries,
                     _ => entries // no filtering
                 };
             }
@@ -60,7 +61,7 @@ namespace tymer.Commands
 
             if (Period.ToLower() == "week" || Period.ToLower() == "month")
             {
-                var entriesByDate = entries.GroupBy(x => x.StartTime.Date);
+                var entriesByDate = results.GroupBy(x => x.StartTime.Date);
 
                 foreach(var dateGrp in entriesByDate)
                 {
