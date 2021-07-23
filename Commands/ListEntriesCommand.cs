@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
-using tymer.Core;
+using tymer.Data;
 
 namespace tymer.Commands
 {
     [Command("list", Description = "List time entries")]
     class ListEntriesCommand : TymeCommandBase
     {
-        [Option("-s|--Start", "Start date to view logs for", CommandOptionType.SingleOrNoValue)]
+        [Option("-s|--Start <DATE>", Description = "Start date to view logs for")]
         public DateTime? StartDate { get; set; }
-        [Option("-e|--End", "End date to view logs for (inclusive of date)", CommandOptionType.SingleOrNoValue)]
+        [Option("-e|--End <DATE>", Description = "End date to view logs for (inclusive of date)")]
         public DateTime? EndDate { get; set; }
 
         [Option("-p|--Period", Description = "Time period to view logs for. Does not work with Start/End dates")]
@@ -26,19 +26,37 @@ namespace tymer.Commands
 
         protected override int OnExecute(CommandLineApplication app)
         {
-            var context = new TymerContext();
+            using var context = new TymerDbContext();
 
-            var entries = FilterEntries(context.TimeEntries)
+            var entries = context.TimeEntries
+                .Where(x => (!StartDate.HasValue || x.StartTime.Date >= StartDate.Value.Date)
+                    && (!EndDate.HasValue || x.StartTime.Date <= EndDate.Value.Date));
+
+            // TODO: if you pass in a start/end date for filtering, the periods don't really work.
+            if (!string.IsNullOrEmpty(Period))
+            {
+                entries = Period switch
+                {
+                    "day" => entries.Where(x => x.StartTime.Date == DateTime.Now.Date),
+                    "week" => entries.Where(x => x.StartTime.Year == DateTime.Now.Year
+                            && GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now)),
+                    "month" => entries.Where(x => x.StartTime.Month == DateTime.Now.Month),
+                    _ => entries // no filtering
+                };
+            }
+
+            var results = entries
                 .OrderByDescending(x => x.StartTime)
-                .ThenByDescending(x => x.EndTime);
+                .ThenByDescending(x => x.EndTime)
+                .ToList();
 
-            if (!entries.Any())
+            if (!results.Any())
             {
                 Console.WriteLine("No time entries recorded for given period.");
                 return base.OnExecute(app);
             }
 
-            var hoursSum = entries.Sum(x => x.Duration);
+            var hoursSum = results.Sum(x => x.Duration);
 
             if (Period.ToLower() == "week" || Period.ToLower() == "month")
             {
@@ -87,31 +105,7 @@ namespace tymer.Commands
             parts.Add(entry.Comments);
 
             var line = string.Join("\t", parts);
-            Console.WriteLine(line);            
-        }
-
-        private IEnumerable<TimeEntry> FilterEntries(List<TimeEntry> entries)
-        {
-            entries = entries
-                .Where(x => (!StartDate.HasValue || x.StartTime.Date == StartDate.Value.Date)
-                    && (!EndDate.HasValue || x.StartTime.Date == EndDate.Value))
-                .ToList();
-            
-            if (!string.IsNullOrEmpty(Period))
-            {
-                switch(Period.ToLower())
-                {
-                    case "day":
-                        return entries.Where(x => x.StartTime.Date == DateTime.Now.Date);
-                    case "week":
-                        return entries.Where(x => x.StartTime.Year == DateTime.Now.Year
-                            && GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now));
-                    case "month":
-                        return entries.Where(x => x.StartTime.Month == DateTime.Now.Month);
-                }
-            }
-
-            return entries;
+            Console.WriteLine(line);
         }
 
         private IEnumerable<TimeEntry> SortEntries(List<TimeEntry> entries)

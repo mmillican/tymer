@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using McMaster.Extensions.CommandLineUtils;
 using tymer.Core;
+using tymer.Data;
 
 namespace tymer.Commands
 {
@@ -10,7 +11,7 @@ namespace tymer.Commands
     {
         [Argument(0, "start", "Start time")]
         public DateTime StartTime { get; set; }
-        
+
         [Argument(1, "end", "End time")]
         public DateTime EndTime { get; set; }
 
@@ -35,17 +36,17 @@ namespace tymer.Commands
                 Comments = Comments
             };
 
-            var context = new TymerContext();
+            using var context = new TymerDbContext();
 
             context.TimeEntries.Add(entry);
 
-            context.SaveEntries();
+            context.SaveChangesAsync();
 
             Console.WriteLine($"Time entry for {entry.Duration} hrs saved.");
             return base.OnExecute(app);
-        }        
+        }
 
-        public override List<string> CreateArgs() 
+        public override List<string> CreateArgs()
         {
             var args = new List<string>();
             return args;
