@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.EntityFrameworkCore;
 using tymer.Core;
 using tymer.Data;
 
@@ -13,19 +14,30 @@ namespace tymer.Commands
         {
             Console.WriteLine("Migrating time entries to DB...");
 
-            using var dbContext = new TymerDbContext();
-
-            var jsonContext = new TymerContext();
-            var jsonEntries = jsonContext.TimeEntries;
-
-            foreach(var jsonEntry in jsonEntries)
+            try
             {
-                dbContext.TimeEntries.Add(jsonEntry);
+                using var dbContext = new TymerDbContext();
+
+                Console.WriteLine("Creating database & applying migrations...");
+                dbContext.Database.Migrate();
+
+                var jsonContext = new TymerContext();
+                var jsonEntries = jsonContext.TimeEntries;
+
+                foreach(var jsonEntry in jsonEntries)
+                {
+                    dbContext.TimeEntries.Add(jsonEntry);
+                }
+
+                dbContext.SaveChanges();
+
+                Console.WriteLine($"--> {jsonEntries.Count} entries migrated to DB");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"ERROR migrating to database: ${ex.Message}");
             }
 
-            dbContext.SaveChanges();
-
-            Console.WriteLine($"--> {jsonEntries.Count} entries migrated to DB");
             return base.OnExecute(app);
         }
 

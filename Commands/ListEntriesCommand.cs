@@ -35,12 +35,13 @@ namespace tymer.Commands
             // TODO: if you pass in a start/end date for filtering, the periods don't really work.
             if (!string.IsNullOrEmpty(Period))
             {
+                var weekDates = DateTime.Now.GetWeekStartAndEnd();
+
                 entries = Period switch
                 {
                     "day" => entries.Where(x => x.StartTime.Date == DateTime.Now.Date),
-                    "week" => entries.Where(x => x.StartTime.Year == DateTime.Now.Year
-                            && GetWeekForDate(x.StartTime) == GetWeekForDate(DateTime.Now)),
-                    "month" => entries.Where(x => x.StartTime.Month == DateTime.Now.Month),
+                    "week" => entries.Where(x => x.StartTime.Date >= weekDates.Start.Date && x.StartTime.Date <= weekDates.End.Date),
+                    "month" => entries.Where(x => x.StartTime.Year == DateTime.Now.Year && x.StartTime.Month == DateTime.Now.Month),
                     "all" => entries,
                     _ => entries // no filtering
                 };
@@ -118,9 +119,6 @@ namespace tymer.Commands
                 _ => entries.OrderBy(x => x.StartTime),
             };
         }
-
-        private static int GetWeekForDate(DateTime date) =>
-            CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
         public override List<string> CreateArgs()
         {
