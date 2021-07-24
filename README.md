@@ -10,13 +10,13 @@ Tymer is built as a .NET Core Global Tool. You can install with the following
 command:
 
 ```bash
-> dotnet tool install -g m2dev.tymer
+dotnet tool install -g m2dev.tymer
 ```
 
 Or temporarily from source by:
 
 ```bash
-> dotnet tool install --global --add-source ./nupkg tymer
+dotnet tool install --global --add-source ./nupkg tymer
 ```
 
 ## Guide
@@ -24,24 +24,24 @@ Or temporarily from source by:
 **Log time entry**
 
 ```bash
-> tymer log <start_time> <end_time> -C "<your_comments>"
+tymer log <start_time<end_time-C "<your_comments>"
 ```
 
 **List time entries**
 
 ```bash
-> tymer list [--help]
+tymer list [--help]
 ```
 
 **Migrate data from JSON file to SQLite DB**
 
 ```bash
-> tymer migrate-to-db
+tymer migrate-to-db
 ```
 
 **Help**
 
-`> tymer --help` will show a list of available commands.
+`tymer --help` will show a list of available commands.
 
 ## TODO
 - List entries per day (given date/range or week)
