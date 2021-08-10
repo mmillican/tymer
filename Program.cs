@@ -6,8 +6,9 @@ namespace tymer
 {
     [Command("tymer")]
     [Subcommand(
-        typeof(LogTimeCommand),
+        typeof(DeleteEntryCommand),
         typeof(ListEntriesCommand),
+        typeof(LogTimeCommand),
         typeof(MigrateToDbCommand)
     )]
     class Tyme : TymeCommandBase
