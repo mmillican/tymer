@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using McMaster.Extensions.CommandLineUtils;
+using Spectre.Console;
 using tymer.Data;
 
 namespace tymer.Commands
@@ -58,66 +58,111 @@ namespace tymer.Commands
                 return base.OnExecute(app);
             }
 
-            var hoursSum = results.Sum(x => x.Duration);
+            var isGroupedByDate = Period.ToLower() == "week" || Period.ToLower() == "month";
 
-            if (Period.ToLower() == "week" || Period.ToLower() == "month")
+            var table = new Table();
+
+            var columns = new List<TableColumn>();
+            if (isGroupedByDate)
+            {
+                columns.Add(DefineColumn("Date"));
+            }
+
+            columns.Add(DefineColumn("Start"));
+            columns.Add(DefineColumn("End"));
+            columns.Add(DefineColumn("Hours"));
+            columns.Add(DefineColumn("Comments"));
+
+            if (IncludeEntryId)
+            {
+                columns.Add(DefineColumn("Entry ID"));
+            }
+
+            table.AddColumns(columns.ToArray());
+
+            if (isGroupedByDate)
             {
                 var entriesByDate = results.GroupBy(x => x.StartTime.Date);
 
                 foreach(var dateGrp in entriesByDate)
                 {
-                    Console.WriteLine($"Date: {dateGrp.Key:dddd MMM dd} ({dateGrp.Sum(x => x.Duration):n2})");
+                    GenerateDateGroupHeaderRow(table, dateGrp.Key.Date, dateGrp.Sum(x => x.Duration));
 
-                    foreach(var entry in dateGrp)
+                    foreach(var entry in dateGrp.OrderBy(x => x.StartTime))
                     {
-                        WriteEntryLine(entry);
+                        GenerateEntryRow(table, entry, isGroupedByDate);
                     }
 
-                    Console.WriteLine("");
+                    table.AddEmptyRow(); // Spacer row between groups
                 }
             }
             else
             {
+                GenerateDateGroupHeaderRow(table, DateTime.Now.Date, entries.ToList().Sum(x => x.Duration));
+
                 foreach (var entry in entries)
                 {
-                    WriteEntryLine(entry);
+                    GenerateEntryRow(table, entry, false);
                 }
             }
 
-            Console.WriteLine("----------");
-            Console.WriteLine($"Total: {hoursSum:n2}");
+            AnsiConsole.Render(table);
 
             return base.OnExecute(app);
         }
 
-        private void WriteEntryLine(TimeEntry entry)
+        private static TableColumn DefineColumn(string title) =>
+            new TableColumn(title)
+            {
+                Padding = new Padding(2, 0),
+            };
+
+        private static IEnumerable<string> AddEmptyColumns(int count)
         {
-            var parts = new List<string>();
+            var cols = new List<string>();
+            for(var idx = 0; idx < count - 1; idx++)
+            {
+                cols.Add(string.Empty);
+            }
+
+            return cols;
+        }
+
+        private void GenerateDateGroupHeaderRow(Table table, DateTime date, double groupDuration)
+        {
+            var columns = new List<string>();
+
+            columns.Add($"[yellow]{date:ddd MMM dd}[/]");
+
+            columns.AddRange(AddEmptyColumns(3));
+
+            columns.Add($"[yellow]{groupDuration:n2}[/]");
+
+            columns.AddRange(AddEmptyColumns(IncludeEntryId ? 2 : 1));
+
+            table.AddRow(columns.ToArray());
+        }
+
+        private void GenerateEntryRow(Table table, TimeEntry entry, bool hasDateCol)
+        {
+             var columns = new List<string>();
+
+            if (hasDateCol)
+            {
+                columns.Add(""); // empty for the date grouping
+            }
+
+            columns.Add(entry.StartTime.ToString("hh:mm tt"));
+            columns.Add(entry.EndTime.ToString("hh:mm tt"));
+            columns.Add(entry.Duration.ToString("n2"));
+            columns.Add(entry.Comments);
 
             if (IncludeEntryId)
             {
-                parts.Add(entry.Id.ToString());
+                columns.Add(entry.Id.ToString());
             }
 
-            parts.Add(entry.StartTime.ToString("hh:mm tt"));
-            parts.Add(entry.EndTime.ToString("hh:mm tt"));
-
-            parts.Add(entry.Duration.ToString("n2"));
-
-            parts.Add(entry.Comments);
-
-            var line = string.Join("\t", parts);
-            Console.WriteLine(line);
-        }
-
-        private IEnumerable<TimeEntry> SortEntries(List<TimeEntry> entries)
-        {
-            return (Period.ToLower()) switch
-            {
-                "end" => entries.OrderBy(x => x.EndTime),
-                "comments" => entries.OrderBy(x => x.Comments),
-                _ => entries.OrderBy(x => x.StartTime),
-            };
+            table.AddRow(columns.ToArray());
         }
 
         public override List<string> CreateArgs()
