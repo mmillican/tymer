@@ -14,13 +14,8 @@ namespace tymer.Core
         {
             get
             {
-                if (TymerConfig.StoreInDocs)
-                {
-                    var docsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    return Path.Combine(docsPath, "Tymer", TymerConfig.DataFile);
-                }
-
-                return TymerConfig.DataFile;
+                var docsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                return Path.Combine(docsPath, "Tymer", TymerConfig.DataFile);
             }
         }
 
@@ -84,13 +79,10 @@ namespace tymer.Core
 
         private void EnsureFolderExists()
         {
-            if (TymerConfig.StoreInDocs)
+            var dirPath = DataFileLocation.Replace(TymerConfig.DataFile, "");
+            if (!Directory.Exists(dirPath))
             {
-                var dirPath = DataFileLocation.Replace(TymerConfig.DataFile, "");
-                if (!Directory.Exists(dirPath))
-                {
-                    Directory.CreateDirectory(dirPath);
-                }
+                Directory.CreateDirectory(dirPath);
             }
         }
 

@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using tymer.Core;
 using tymer.Data;
 
+// Ignore Obsolete error on TymerContext
+#pragma warning disable 618
+
 namespace tymer.Commands
 {
     [Command("migrate-to-db", Description = "Migrate the entries from JSON to SQLite")]
@@ -47,4 +50,6 @@ namespace tymer.Commands
             return args;
         }
     }
+
+    #pragma warning restore 618
 }
